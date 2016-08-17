@@ -10,6 +10,9 @@ published: false
 
 A JSON-Schema Powered CMS
 A few months ago Jetsetter decided to revamp the tools that our editorial team uses to create content. Instead of listing all of the problems with our old CMS, I’ll let it speak for itself:
+
+![Old Jetsetter CMS](/public/img/cms1.png)
+
 That’s pretty much all there was to the old CMS. Placing content inside an article other than plain text (bold, italics, lists, hyperlinks, etc) required the user to insert raw HTML, oftentimes with the help of an engineer. There was also very little support for images, which didn’t make much sense given our huge repository of awesome travel and hotel imagery.
 Needless to say, this was not anyone’s idea of an ideal system. So we set out to change that.
 
@@ -59,12 +62,12 @@ JSON Schema allowed us to easily define the structure of our widgets and check w
 
 And the data for a Social widget would simply look like this:
 
-{% highlight js %}
+```js
 {
     "socialType": "Pinterest",
     "socialUrl": "https://www.facebook.com/Jetsetter/posts/10157238317965361"
 }
-{% endhighlight %}
+```
 
 Not only did JSON Schema enable us to document the structure of our data, we could use that documentation to validate the data on both the client and the server.
 However, we still had to create the new UI that would allow us to extract this data. We were using React and it would have been fairly easy to create some kind of SocialWidget component was rendered whenever the user wanted to add a Social embed to their article. The SocialWidget component could have extracted the different socialTypes and put them into an HTML select element and rendered an HTML input element for the socialUrl. 
@@ -75,6 +78,9 @@ The big breakthrough for us was when we realized that we could use the schema to
 
 All we needed to do was feed our widget schemas into react-jsonschema-form and…
 
+![React form](/public/img/cms2.png)
+
+
 This was HUGE. Now our entire CMS could be powered by our schemas. If we wanted to add a new socialType or add a field to the Social widget or even just change the label for the input, all we needed to do was update the schema and everything just worked.
 
 
@@ -82,7 +88,7 @@ This was HUGE. Now our entire CMS could be powered by our schemas. If we wanted 
 
 In addition to defining schemas for our widgets, we needed to define schemas for our different article types so that an entire article’s data could be validated and not just the individual widgets. An article consists of several singular inputs, like the article’s title, and a list of widgets. Here’s an abbreviated example of a schema for our Longform articles:
 
-{% highlight js %}
+```js
 {
   "type": "object",
   "required": [
@@ -115,7 +121,7 @@ In addition to defining schemas for our widgets, we needed to define schemas for
   },
   "definitions": {...}
 }
-{% endhighlight %}
+```
 
 Notice that this schema makes use of the “oneOf” keyword, which tells us that each item in the widgets array must validate against exactly one of the schemas listed. This allows our article schemas to be very flexible in the size and structure of articles that validate against it, but it presented us with another problem: react-jsonschema-form didn’t know how to render this kind of schema.
 
@@ -123,7 +129,7 @@ To solve this problem, we kept track of a special schema — a “dynamic”
 
 Here’s what the dynamic schema would look like after the article is first created:
 
-{% highlight js %}
+```js
 {
   "type": "object",
   "required": [...],
@@ -138,11 +144,11 @@ Here’s what the dynamic schema would look like after the article is first crea
   },
   "definitions": {...}
 }
-{% endhighlight %}
+```
 
 And here’s what the dynamic schema would look like after the user added a Content widget, and Social widget, and another Content widget:
 
-{% highlight js %}
+```js
 {
   "type": "object",
   "required": [...],
@@ -161,9 +167,12 @@ And here’s what the dynamic schema would look like after the user added a Cont
   },
   "definitions": {...}
 }
-{% endhighlight %}
+```
 
 We made use of react-jsonschema-form’s customizability in order to give the user the ability to add new widgets to an article. We overrode the default library behavior to add an “Add Widget” button beneath each of the widgets:
+
+![Add Widget](/public/img/cms3.png)
+
 
 That same kind of customizability also allowed us to do things like integrate a rich text editor component (we chose react-rte) so that our writers never had to write HTML again and add the ability to reorder and remove widgets to enable users to quickly restructure their content.
 
