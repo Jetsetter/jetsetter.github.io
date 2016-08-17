@@ -31,7 +31,7 @@ We knew we wanted to store articles as JSON because it’s a flexible format and
 
 JSON Schema allowed us to easily define the structure of our widgets and check whether the data for a specific widget was valid. Here’s a trimmed-down schema that defines our Social widget:
 
-{% highlight js %}
+```js
 {
   "type": "object",
   "title": "Social",
@@ -55,7 +55,7 @@ JSON Schema allowed us to easily define the structure of our widgets and check w
     }
   }
 }
-{% endhighlight %}
+```
 
 And the data for a Social widget would simply look like this:
 
