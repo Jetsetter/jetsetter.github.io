@@ -2,141 +2,171 @@
 title: JSON-Schema Powered CMS
 author: Mike Plis
 layout: post
-permalink: /json-schema-powered-cms/
 disqus_page_identifier: json-schema-powered-cms
 published: false
 ---
 
+---
 
-<div class="message">
-  Howdy! This is an example blog post that shows several types of HTML content supported in this theme.
-</div>
+A JSON-Schema Powered CMS
+A few months ago Jetsetter decided to revamp the tools that our editorial team uses to create content. Instead of listing all of the problems with our old CMS, I’ll let it speak for itself:
+That’s pretty much all there was to the old CMS. Placing content inside an article other than plain text (bold, italics, lists, hyperlinks, etc) required the user to insert raw HTML, oftentimes with the help of an engineer. There was also very little support for images, which didn’t make much sense given our huge repository of awesome travel and hotel imagery.
+Needless to say, this was not anyone’s idea of an ideal system. So we set out to change that.
 
-Cum sociis natoque penatibus et magnis <a href="#">dis parturient montes</a>, nascetur ridiculus mus. *Aenean eu leo quam.* Pellentesque ornare sem lacinia quam venenatis vestibulum. Sed posuere consectetur est at lobortis. Cras mattis consectetur purus sit amet fermentum.
 
-> Curabitur blandit tempus porttitor. Nullam quis risus eget urna mollis ornare vel eu leo. Nullam id dolor id nibh ultricies vehicula ut id elit.
+---
 
-Etiam porta **sem malesuada magna** mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.
+We researched existing CMS solutions, but decided to build our own for two reasons.
+Easy integration with our existing platform — we wanted to allow users to make use of our large imagery repository and hotel data in creative ways.
+Customized workflow — building a CMS ourselves would give us full control to quickly build tools that effectively met our team’s specific needs.
 
-## Inline HTML elements
+The old CMS offered users very few tools to augment articles beyond plain text, and the ones it did offer were too cumbersome to use. We wanted a system that was flexible and powerful, while at the same time simple and intuitive to use.
 
-HTML defines a long list of available inline tags, a complete list of which can be found on the [Mozilla Developer Network](https://developer.mozilla.org/en-US/docs/Web/HTML/Element).
+We established the concept of “widgets” — modular, structured blocks of content that could be added to an article and easily reorganized. A large selection of widgets (rich text, photos, videos, social embeds, etc.) would allow for a broad range of expression, while also abstracting as many of the details from the user as possible.
 
-- **To bold text**, use `<strong>`.
-- *To italicize text*, use `<em>`.
-- Abbreviations, like <abbr title="HyperText Markup Langage">HTML</abbr> should use `<abbr>`, with an optional `title` attribute for the full phrase.
-- Citations, like <cite>&mdash; Mark otto</cite>, should use `<cite>`.
-- <del>Deleted</del> text should use `<del>` and <ins>inserted</ins> text should use `<ins>`.
-- Superscript <sup>text</sup> uses `<sup>` and subscript <sub>text</sub> uses `<sub>`.
+We knew we wanted to store articles as JSON because it’s a flexible format and easy to work with, so when we began discussing how to implement “structured blocks of content”, we felt that JSON Schema was a natural fit in a system like this. Our friends at Oyster had success integrating JSON Schema into their rebuilt CMS, so we felt confident that it was something we could make use of as well.
 
-Most of these elements are styled by browsers with few modifications on our part.
 
-## Heading
+---
 
-Vivamus sagittis lacus vel augue rutrum faucibus dolor auctor. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-
-### Code
-
-Cum sociis natoque penatibus et magnis dis `code element` montes, nascetur ridiculus mus.
+JSON Schema allowed us to easily define the structure of our widgets and check whether the data for a specific widget was valid. Here’s a trimmed-down schema that defines our Social widget:
 
 {% highlight js %}
-// Example can be run directly in your JavaScript console
-
-// Create a function that takes two arguments and returns the sum of those arguments
-var adder = new Function("a", "b", "return a + b");
-
-// Call the function
-adder(2, 6);
-// > 8
+{
+  "type": "object",
+  "title": "Social",
+  "required": [
+    "socialUrl",
+    "socialType",
+  ],
+  "properties": {
+    "socialType": {
+      "type": "string",
+      "enum": [
+        "Facebook",
+        "Twitter",
+        "Instagram",
+        "Pinterest"
+      ]
+    },
+    "socialUrl": {
+      "type": "string",
+      "title": "Social URL"
+    }
+  }
+}
 {% endhighlight %}
 
-Aenean lacinia bibendum nulla sed consectetur. Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa.
+And the data for a Social widget would simply look like this:
 
-### Gists via GitHub Pages
+{% highlight js %}
+{
+    "socialType": "Pinterest",
+    "socialUrl": "https://www.facebook.com/Jetsetter/posts/10157238317965361"
+}
+{% endhighlight %}
 
-Vestibulum id ligula porta felis euismod semper. Nullam quis risus eget urna mollis ornare vel eu leo. Donec sed odio dui.
+Not only did JSON Schema enable us to document the structure of our data, we could use that documentation to validate the data on both the client and the server.
+However, we still had to create the new UI that would allow us to extract this data. We were using React and it would have been fairly easy to create some kind of SocialWidget component was rendered whenever the user wanted to add a Social embed to their article. The SocialWidget component could have extracted the different socialTypes and put them into an HTML select element and rendered an HTML input element for the socialUrl. 
 
-{% gist 5555251 gist.md %}
+However, this wasn’t going to scale that well at all. We would have had to update the React component whenever we wanted to make even a small change to the schema. Do you want bugs? Because that’s how you get bugs.
 
-Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Vestibulum id ligula porta felis euismod semper.
+The big breakthrough for us was when we realized that we could use the schema to generate the UI. There were a few libraries out there that could do this, but we settled on the appropriately-named react-jsonschema-form because it was very customizable and actively maintained.
 
-### Lists
+All we needed to do was feed our widget schemas into react-jsonschema-form and…
 
-Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean lacinia bibendum nulla sed consectetur. Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
+This was HUGE. Now our entire CMS could be powered by our schemas. If we wanted to add a new socialType or add a field to the Social widget or even just change the label for the input, all we needed to do was update the schema and everything just worked.
 
-* Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
-* Donec id elit non mi porta gravida at eget metus.
-* Nulla vitae elit libero, a pharetra augue.
 
-Donec ullamcorper nulla non metus auctor fringilla. Nulla vitae elit libero, a pharetra augue.
+---
 
-1. Vestibulum id ligula porta felis euismod semper.
-2. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
-3. Maecenas sed diam eget risus varius blandit sit amet non magna.
+In addition to defining schemas for our widgets, we needed to define schemas for our different article types so that an entire article’s data could be validated and not just the individual widgets. An article consists of several singular inputs, like the article’s title, and a list of widgets. Here’s an abbreviated example of a schema for our Longform articles:
 
-Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis.
+{% highlight js %}
+{
+  "type": "object",
+  "required": [
+    "title",
+    "deck",
+    "widgets"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "deck": {
+      "type": "string",
+      "title": "Deck"
+    },
+    "widgets": {
+      "type": "array",
+      "title": "Widgets",
+      "items": {
+        "oneOf": [
+          {"$ref": "#/definitions/content"},
+          {"$ref": "#/definitions/photo"},
+          {"$ref": "#/definitions/pullQuote"},
+          {"$ref": "#/definitions/video"},
+          {"$ref": "#/definitions/social"}
+        ]
+      }
+    }
+  },
+  "definitions": {...}
+}
+{% endhighlight %}
 
-<dl>
-  <dt>HyperText Markup Language (HTML)</dt>
-  <dd>The language used to describe and define the content of a Web page</dd>
+Notice that this schema makes use of the “oneOf” keyword, which tells us that each item in the widgets array must validate against exactly one of the schemas listed. This allows our article schemas to be very flexible in the size and structure of articles that validate against it, but it presented us with another problem: react-jsonschema-form didn’t know how to render this kind of schema.
 
-  <dt>Cascading Style Sheets (CSS)</dt>
-  <dd>Used to describe the appearance of Web content</dd>
+To solve this problem, we kept track of a special schema — a “dynamic” schema — inside our application’s state that react-jsonschema-form did know how to render. Whenever a user wanted to add a new widget to their article, we added that widget’s schema to the dynamic schema and then fed that back into react-jsonschema-form.
 
-  <dt>JavaScript (JS)</dt>
-  <dd>The programming language used to build advanced Web sites and applications</dd>
-</dl>
+Here’s what the dynamic schema would look like after the article is first created:
 
-Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Nullam quis risus eget urna mollis ornare vel eu leo.
+{% highlight js %}
+{
+  "type": "object",
+  "required": [...],
+  "properties": {
+    "title": {...},
+    "deck": {...},
+    "widgets": {
+      "type": "array",
+      "title": "Widgets",
+      "items": []
+    }
+  },
+  "definitions": {...}
+}
+{% endhighlight %}
 
-### Images
+And here’s what the dynamic schema would look like after the user added a Content widget, and Social widget, and another Content widget:
 
-Quisque consequat sapien eget quam rhoncus, sit amet laoreet diam tempus. Aliquam aliquam metus erat, a pulvinar turpis suscipit at.
+{% highlight js %}
+{
+  "type": "object",
+  "required": [...],
+  "properties": {
+    "title": {...},
+    "deck": {...},
+    "widgets": {
+      "type": "array",
+      "title": "Widgets",
+      "items": [
+          {"$ref": "#/definitions/content"},
+          {"$ref": "#/definitions/social"},
+          {"$ref": "#/definitions/content"}
+      ]
+    }
+  },
+  "definitions": {...}
+}
+{% endhighlight %}
 
-![placeholder](http://placehold.it/800x400 "Large example image")
-![placeholder](http://placehold.it/400x200 "Medium example image")
-![placeholder](http://placehold.it/200x200 "Small example image")
+We made use of react-jsonschema-form’s customizability in order to give the user the ability to add new widgets to an article. We overrode the default library behavior to add an “Add Widget” button beneath each of the widgets:
 
-### Tables
+That same kind of customizability also allowed us to do things like integrate a rich text editor component (we chose react-rte) so that our writers never had to write HTML again and add the ability to reorder and remove widgets to enable users to quickly restructure their content.
 
-Aenean lacinia bibendum nulla sed consectetur. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+The new CMS was originally built to power our Magazine, but it can drive other parts of Jetsetter.com too. All we need to do is define the document schema and any new widget schemas we need. Then we can automatically generate the UI, collect user input, and construct a JSON object that can be stored in our database and used however we want. We’ve already created a Homepage document with a Homepage Hero Item widget that powers the carousel of images on Jetsetter’s homepage.
 
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Upvotes</th>
-      <th>Downvotes</th>
-    </tr>
-  </thead>
-  <tfoot>
-    <tr>
-      <td>Totals</td>
-      <td>21</td>
-      <td>23</td>
-    </tr>
-  </tfoot>
-  <tbody>
-    <tr>
-      <td>Alice</td>
-      <td>10</td>
-      <td>11</td>
-    </tr>
-    <tr>
-      <td>Bob</td>
-      <td>4</td>
-      <td>3</td>
-    </tr>
-    <tr>
-      <td>Charlie</td>
-      <td>7</td>
-      <td>9</td>
-    </tr>
-  </tbody>
-</table>
-
-Nullam id dolor id nibh ultricies vehicula ut id elit. Sed posuere consectetur est at lobortis. Nullam quis risus eget urna mollis ornare vel eu leo.
-
------
-
-Want to see something else added? <a href="https://github.com/poole/poole/issues/new">Open an issue.</a>
+The combination of JSON Schema and react-jsonschema-form resulted in an extremely flexible and powerful system that is easy to use, maintain, and expand.
