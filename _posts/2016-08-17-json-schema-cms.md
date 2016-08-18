@@ -3,7 +3,7 @@ title: JSON-Schema Powered CMS
 author: Mike Plis
 layout: post
 disqus_page_identifier: json-schema-powered-cms
-published: false
+published: true
 ---
 
 ---
