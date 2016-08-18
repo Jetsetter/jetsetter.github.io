@@ -33,13 +33,13 @@ We knew we wanted to store articles as JSON because it’s a flexible format and
 
 JSON Schema allowed us to easily define the structure of our widgets and check whether the data for a specific widget was valid. Here’s a trimmed-down version of the schema we wrote that defines a widget for a social embed:
 
-{% highlight javascript %}
+```json
 {
   "type": "object",
   "title": "Social",
   "required": [
     "socialUrl",
-    "socialType",
+    "socialType"
   ],
   "properties": {
     "socialType": {
@@ -57,16 +57,16 @@ JSON Schema allowed us to easily define the structure of our widgets and check w
     }
   }
 }
-{% endhighlight %}
+```
 
 And the data for a Social widget would simply look like this:
 
-{% highlight javascript %}
+```json
 {
     "socialType": "Facebook",
     "socialUrl": "https://www.facebook.com/Jetsetter/posts/10157238317965361"
 }
-{% endhighlight %}
+```
 
 Not only did JSON Schema enable us to document the structure of our data, we could use that documentation to validate the data on both the client and the server.
 
@@ -87,7 +87,7 @@ This was HUGE. Now our entire CMS could be powered by our schemas. If we wanted 
 
 In addition to defining schemas for our widgets, we needed to define schemas for our different article types so that an entire article’s data could be validated and not just the individual widgets. An article consists of several singular inputs, like the article’s title, and a list of widgets. Here’s an abbreviated example of a schema for our Longform articles:
 
-{% highlight javascript %}
+```json
 {
   "type": "object",
   "required": [
@@ -120,7 +120,7 @@ In addition to defining schemas for our widgets, we needed to define schemas for
   },
   "definitions": {...}
 }
-{% endhighlight %}
+```
 
 Notice that this schema makes use of the `oneOf` keyword, which tells us that each item in the `widgets` array must validate against exactly one of the schemas listed. This allows our article schemas to be very flexible in the size and structure of articles that validate against it, but it presented us with another problem: react-jsonschema-form didn’t know how to render this kind of schema.
 
@@ -128,7 +128,7 @@ To solve this problem, we kept track of a special schema — a “dynamic”
 
 Here’s what the dynamic schema would look like after the article was first created:
 
-{% highlight javascript %}
+```json
 {
   "type": "object",
   "required": [...],
@@ -143,11 +143,11 @@ Here’s what the dynamic schema would look like after the article was first cre
   },
   "definitions": {...}
 }
-{% endhighlight %}
+```
 
 And here’s what the dynamic schema would look like after the user added a Content widget, and Social widget, and another Content widget:
 
-{% highlight javascript %}
+```json
 {
   "type": "object",
   "required": [...],
@@ -166,7 +166,7 @@ And here’s what the dynamic schema would look like after the user added a Cont
   },
   "definitions": {...}
 }
-{% endhighlight %}
+```
 
 We made use of react-jsonschema-form’s customizability in order to give the user the ability to add new widgets to an article. We overrode the default library behavior to add an “Add Widget” button beneath each of the widgets:
 
@@ -178,3 +178,7 @@ That same kind of customizability also allowed us to do things like integrate a 
 The new CMS was originally built to power our Magazine, but it can drive other parts of Jetsetter.com too. All we need to do is define the document schema and any new widget schemas we need. Then we can generate the UI automatically, collect user input, and construct a JSON object that can be stored in our database and used however we want. We’ve already created a Homepage document with a Homepage Hero Item widget that controls the carousel of images on Jetsetter’s homepage.
 
 The combination of React, JSON Schema, and react-jsonschema-form resulted in a relatively small codebase that powers an extremely flexible and robust system that is easy to use, maintain, and expand.
+
+<video width="100%" autoplay loop>
+  <source src="/public/video/cms-test1.m4v" type="video/mp4">
+</video>
