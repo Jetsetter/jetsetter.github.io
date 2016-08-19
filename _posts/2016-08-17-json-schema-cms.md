@@ -4,6 +4,7 @@ author: Mike Plis
 layout: post
 disqus_page_identifier: json-schema-powered-cms
 published: true
+date: 2016-08-19
 ---
 
 ---
