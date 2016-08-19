@@ -26,7 +26,7 @@ The old CMS offered very few tools to augment articles beyond plain text, and th
 
 We established the concept of “widgets” — modular, structured blocks of content that could be added to an article and easily reorganized. A large selection of widgets (rich text, photos, videos, social embeds, etc.) would allow for a broad range of expression, while also abstracting as many of the details away from the user as possible.
 
-We knew we wanted to store articles as JSON because it’s a flexible format and is easy to work with, so when we began discussing how to implement “structured blocks of content”, we felt that JSON Schema was a natural fit in a system like this. Our friends at Oyster [had success integrating JSON Schema into their rebuilt CMS](http://tech.oyster.com/when-building-your-own-cms-is-the-right-choice/), so we felt confident that it was something we could make use of as well.
+We knew we wanted to store articles as JSON because it’s a flexible format and is easy to work with, so when we began discussing how to implement “structured blocks of content”, we felt that [JSON Schema](https://spacetelescope.github.io/understanding-json-schema/) was a natural fit in a system like this. Our friends at Oyster [had success integrating JSON Schema into their rebuilt CMS](http://tech.oyster.com/when-building-your-own-cms-is-the-right-choice/), so we felt confident that it was something we could make use of as well.
 
 
 ---
