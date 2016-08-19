@@ -8,6 +8,7 @@ layout: default
   {{ content }}
 </div>
 
+{% if site.related_posts %}
 <div class="related">
   <h2>Related Posts</h2>
   <ul class="related-posts">
@@ -23,3 +24,22 @@ layout: default
     {% endfor %}
   </ul>
 </div>
+{% endif %}
+
+{% if page.disqus_page_identifier %}
+<div class="comments">
+<div id="disqus_thread"></div>
+<script>
+    var disqus_config = function () {
+        this.page.url = "http://tech.jetsetter.com{{ site.baseurl }}{{ page.url }}";
+        this.page.identifier = "{{ page.disqus_page_identifier }}";
+    };
+  (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = '//jetsetter-tech.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+  })();
+</script>
+</div>
+{% endif %}
