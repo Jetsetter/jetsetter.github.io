@@ -5,8 +5,6 @@ layout: post
 disqus_page_identifier: dto-hydration
 date: 2016-10-31
 ---
-# Config-based document hydration
-
 Here at Jetsetter we produce a lot of content.  MikeP [described](http://tech.jetsetter.com/2016/08/19/json-schema-cms/) how we recently revamped our CMS admin tool to enable our editors to produce great looking content without having to type a single HTML tag.
 
 If we have an article talking about why this hotel is just the absolute to-die-for destination this season, and we have this hotel listed on Jetsetter, then wouldn't it be nice to show off the Jetsetter price when linking to the hotel page?
