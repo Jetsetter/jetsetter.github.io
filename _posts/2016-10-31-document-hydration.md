@@ -34,6 +34,7 @@ Take this simple document as an example:
 We will want to populate this object with the full details of the referenced property if possible.  Even though this is a Jetsetter property, and this is all Jetsetter code, we (the backend) want nothing to do with how to fetch this data.  To accomplish this, the client facing side CMS backend is configuable (via config files) on how to match and fetch any resources referenced in the document.  For example:
 
 ```
+{
 "property": {
     "tokens": {
         "property-id": ["propertyId", "propertyIds"]
@@ -53,10 +54,14 @@ We will want to populate this object with the full details of the referenced pro
 Hydration happens in a few steps-
 
 * ### Extract matching metadata
-	config describes "tokens" which match on field names in the document and eventually are used when fetching the given resource.  In this case, "property-id": ["propertyId", "propertyIds"] means that any fields called "propertyId" or "propertyIds" will lead to this resource being fetched.
+
+The configuration describes "tokens" which match on field names in the document and eventually are used when fetching the given resource.  In this case, *"property-id": ["propertyId", "propertyIds"]* means that any fields called "propertyId" or "propertyIds" will lead to this resource being fetched.
 * ### Fetch resources
-	replace token in curl with extracted references
-	"path": "/v4/PropertyService/properties/${property-id}", -> /v4/PropertyService/properties/65
+
+Then it replaces token in braces with extracted references
+<pre>"path": "/v4/PropertyService/properties/${property-id}"</pre> 
+becomes:
+<pre>/v4/PropertyService/properties/65</pre>
 * ### Infuse API response into document (hydration)
 
 Our original document:
@@ -84,6 +89,7 @@ After matching and fetching and infusing becomes:
 What about a more complex example, where one widget might need to be hydrated against different APIs depending on the content?  What if the 'token' is just one piece of the loaded value?  Note the different extractor fields below which will match and capture the relevant piece of the data:
 
 ```
+{
 "twitter-oembed": {
     "tokens": {
         "social-id": ["socialId"]
