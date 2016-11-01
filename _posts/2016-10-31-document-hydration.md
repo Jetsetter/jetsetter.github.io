@@ -25,7 +25,7 @@ The backend doesn't know what resources are referenced in these documents, and d
 
 Take this simple document as an example:
 
-```json
+```
 {
   "propertyId": 65
 }
@@ -33,15 +33,13 @@ Take this simple document as an example:
 
 We will want to populate this object with the full details of the referenced property if possible.  Even though this is a Jetsetter property, and this is all Jetsetter code, we (the backend) want nothing to do with how to fetch this data.  To accomplish this, the client facing side CMS backend is configuable (via config files) on how to match and fetch any resources referenced in the document.  For example:
 
-```json
+```
 "property": {
     "tokens": {
         "property-id": ["propertyId", "propertyIds"]
     },
     "method": "GET",
-    "header": {
-        ...
-    },
+    "header": { ... },
     "ssl": true,
     "host": "api.jetsetter.com",
     "port": 443,
@@ -63,7 +61,7 @@ Hydration happens in a few steps-
 
 Our original document:
 
-```json
+```
 {
   "propertyId": 65
 }
@@ -71,7 +69,7 @@ Our original document:
 
 After matching and fetching and infusing becomes:
 
-```json
+```
 {
   "propertyId": 65,
   "property": [
@@ -80,13 +78,12 @@ After matching and fetching and infusing becomes:
       "data": {
         "name": "Solage Calistoga",
         "url": "/hotels/calistoga/california/65/solage-calistoga",
-        ...
-}
+        …
 ```
 
 What about a more complex example, where one widget might need to be hydrated against different APIs depending on the content?  What if the 'token' is just one piece of the loaded value?  Note the different extractor fields below which will match and capture the relevant piece of the data:
 
-```json
+```
 "twitter-oembed": {
     "tokens": {
         "social-id": ["socialId"]
