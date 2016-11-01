@@ -56,6 +56,7 @@ Hydration happens in a few steps-
 * ### Extract matching metadata
 
 The configuration describes "tokens" which match on field names in the document and eventually are used when fetching the given resource.  In this case, *"property-id": ["propertyId", "propertyIds"]* means that any fields called "propertyId" or "propertyIds" will lead to this resource being fetched.
+
 * ### Fetch resources
 
 Then it replaces token in braces with extracted references
