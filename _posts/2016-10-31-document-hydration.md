@@ -25,28 +25,32 @@ The backend doesn't know what resources are referenced in these documents, and d
 
 Take this simple document as an example:
 
-    {
-      "propertyId": 65
-    }
+```json
+{
+  "propertyId": 65
+}
+```
 
 We will want to populate this object with the full details of the referenced property if possible.  Even though this is a Jetsetter property, and this is all Jetsetter code, we (the backend) want nothing to do with how to fetch this data.  To accomplish this, the client facing side CMS backend is configuable (via config files) on how to match and fetch any resources referenced in the document.  For example:
 
-    "property": {
-        "tokens": {
-            "property-id": ["propertyId", "propertyIds"]
-        },
-        "method": "GET",
-        "header": {
-            ...
-        },
-        "ssl": true,
-        "host": "api.jetsetter.com",
-        "port": 443,
-        "path": "/v4/PropertyService/properties/${property-id}",
-        "data": {},
-        "max-connections": 10,
-        "max-retries": 0
+```json
+"property": {
+    "tokens": {
+        "property-id": ["propertyId", "propertyIds"]
     },
+    "method": "GET",
+    "header": {
+        ...
+    },
+    "ssl": true,
+    "host": "api.jetsetter.com",
+    "port": 443,
+    "path": "/v4/PropertyService/properties/${property-id}",
+    "data": {},
+    "max-connections": 10,
+    "max-retries": 0
+},
+```
 
 Hydration happens in a few steps-
 
@@ -59,58 +63,64 @@ Hydration happens in a few steps-
 
 Our original document:
 
-    {
-      "propertyId": 65
-    }
+```json
+{
+  "propertyId": 65
+}
+```
 
 After matching and fetching and infusing becomes:
 
+```json
+{
+  "propertyId": 65,
+  "property": [
     {
-      "propertyId": 65,
-      "property": [
-        {
-          "status": 0,
-          "data": {
-            "name": "Solage Calistoga",
-            "url": "/hotels/calistoga/california/65/solage-calistoga",
-            ...
-    }
+      "status": 0,
+      "data": {
+        "name": "Solage Calistoga",
+        "url": "/hotels/calistoga/california/65/solage-calistoga",
+        ...
+}
+```
 
 What about a more complex example, where one widget might need to be hydrated against different APIs depending on the content?  What if the 'token' is just one piece of the loaded value?  Note the different extractor fields below which will match and capture the relevant piece of the data:
 
-    "twitter-oembed": {
-        "tokens": {
-            "social-id": ["socialId"]
-        },
-        "extractors": {
-            "social-id": "^(.*twitter.com.*)$"
-        },
-        "method": "GET",
-        "header": {},
-        "ssl": true,
-        "host": "publish.twitter.com",
-        "port": 443,
-        "path": "/oembed?url=${social-id}",
-        "data": {},
-        "max-connections": 10,
-        "max-retries": 0
+```json
+"twitter-oembed": {
+    "tokens": {
+        "social-id": ["socialId"]
     },
-    "instagram-oembed": {
-        "tokens": {
-            "social-id": ["socialId"]
-        },
-        "extractors": {
-            "social-id": "^(.*instagram.com.*)$"
-        },
-        "method": "GET",
-        "header": {},
-        "ssl": true,
-        "host": "api.instagram.com",
-        "port": 443,
-        "path": "/oembed/?url=${social-id}",
-        "data": {},
-        "max-connections": 10,
-        "max-retries": 0
-    }
+    "extractors": {
+        "social-id": "^(.*twitter.com.*)$"
+    },
+    "method": "GET",
+    "header": {},
+    "ssl": true,
+    "host": "publish.twitter.com",
+    "port": 443,
+    "path": "/oembed?url=${social-id}",
+    "data": {},
+    "max-connections": 10,
+    "max-retries": 0
+},
+"instagram-oembed": {
+    "tokens": {
+        "social-id": ["socialId"]
+    },
+    "extractors": {
+        "social-id": "^(.*instagram.com.*)$"
+    },
+    "method": "GET",
+    "header": {},
+    "ssl": true,
+    "host": "api.instagram.com",
+    "port": 443,
+    "path": "/oembed/?url=${social-id}",
+    "data": {},
+    "max-connections": 10,
+    "max-retries": 0
+}
+```
 
 In real life we have many additional configured endpoints and some of the documents reference a great number of external resources.  We would not want the performance of the website to be dependent on all of these external data sources so one final additional step is to load the hydrated documents into an elastic search index.  This gives us horizontal scalability and decouples the serving of the documents with the production/hydration, as well as allows for elastic search to do some of the heavy lifting of querying documents based on different custom fields.
