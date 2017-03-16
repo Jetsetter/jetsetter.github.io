@@ -27,7 +27,7 @@ We use a perceptual image hash called dHash ("difference hash"), which was [deve
 * Calculate the "column" difference hash: same as above, but for each column, moving top to bottom
 * Concatenate the two bit values together to get the final 128-bit hash
 
-dHash is great because it's very simple to understand as well as to implement. It's also fast to calculate (Python is not very fast at bit twiddling, but all the hard work of converting to grayscale and downsizing is done by a C library: [ImageMagick/wand](http://docs.wand-py.org/en/latest/) or [PIL](https://pillow.readthedocs.io/en/4.0.x/)).
+dHash is great because it's fairly accurate, and very simple to understand and implement. It's also fast to calculate (Python is not very fast at bit twiddling, but all the hard work of converting to grayscale and downsizing is done by a C library: [ImageMagick/wand](http://docs.wand-py.org/en/latest/) or [PIL](https://pillow.readthedocs.io/en/4.0.x/)).
 
 The core of the dHash code is as simple as a couple of nested `for` loops:
 
