@@ -27,7 +27,7 @@ We use a perceptual image hash called dHash ("difference hash"), which was [deve
 * Calculate the "column" difference hash: same as above, but for each column, moving top to bottom
 * Concatenate the two bit values together to get the final 128-bit hash
 
-dHash is great because it's fairly accurate, and very simple to understand and implement. It's also fast to calculate (Python is not very fast at bit twiddling, but all the hard work of converting to grayscale and downsizing is done by a C library: [ImageMagick/wand](http://docs.wand-py.org/en/latest/) or [PIL](https://pillow.readthedocs.io/en/4.0.x/)).
+dHash is great because it's fairly accurate, and very simple to understand and implement. It's also fast to calculate (Python is not very fast at bit twiddling, but all the hard work of converting to grayscale and downsizing is done by a C library: [ImageMagick+wand](http://docs.wand-py.org/en/latest/) or [PIL](https://pillow.readthedocs.io/en/4.0.x/)).
 
 Here's what this process looks like visually:
 
@@ -73,15 +73,30 @@ def get_num_bits_different(hash1, hash2):
 
 On our set of images (over 200,000 total) we set the 128-bit dHash threshold to 2. In other words, if the hashes are equal or only different in 1 or 2 bits, we consider them duplicates. In our tests, this is a large enough delta to catch most of the dupes. When we tried going to 4 or 5 it started catching false positives -- images that had similar fingerprints but were too different visually.
 
-For example, this was one of the image pairs that helped us settle on a threshold of 2. These two images have a delta of 4 bits:
+For example, this was one of the image pairs that helped us settle on a threshold of 2 -- these two images have a delta of only 4 bits:
 
 ![False positive "dupes" with dHash delta of 4 bits](/public/img/dupes-false-positive.jpg)
 
 
-MySQL filter
-------------
+MySQL bit counting
+------------------
 
-TODO
+I'm a big PostgreSQL fan, but we're using MySQL for this project, and one of the neat little functions it has that PostgreSQL doesn't is `BIT_COUNT()`, which counts the number of 1 bits in a 64-bit integer. So if you break up the 128-bit hash into two parts you can use two `BIT_COUNT` calls to determine whether a binary hash column is within the threshold.
+
+It's a little round-about, because MySQL doesn't seem to have a way to convert part of a binary column to a 64-bit integer, so we did it going to hex and back. Our dHash column is called `dhash8`, and `dhash8_0` and `dhash8_1` are the high and low 64-bit literal values of the hash of the image we're comparing.
+
+So here's the query we use to detect duplicates when we upload a new image:
+
+```sql
+SELECT asset_id, dhash8
+FROM assets
+WHERE
+    BIT_COUNT(CAST(CONV(HEX(SUBSTRING(dhash8, 1, 8)), 16, 10)
+        AS UNSIGNED) ^ :dhash8_0) +    -- high part
+    BIT_COUNT(CAST(CONV(HEX(SUBSTRING(dhash8, 9, 8)), 16, 10)
+        AS UNSIGNED) ^ :dhash8_1)      -- plus low part
+    <= 2                               -- less than threshold?
+```
 
 
 BK-trees and fast dupe detection
