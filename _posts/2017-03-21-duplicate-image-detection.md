@@ -29,11 +29,17 @@ We use a perceptual image hash called dHash ("difference hash"), which was [deve
 
 dHash is great because it's fairly accurate, and very simple to understand and implement. It's also fast to calculate (Python is not very fast at bit twiddling, but all the hard work of converting to grayscale and downsizing is done by a C library: [ImageMagick+wand](http://docs.wand-py.org/en/latest/) or [PIL](https://pillow.readthedocs.io/en/4.0.x/)).
 
-Here's what this process looks like visually:
+Here's what this process looks like visually. An original image:
 
-* TODO: original image
-* TODO: grayscale, downsized image (but blown up)
-* TODO: final output black and white (but blown up)
+![Diver - original image](/public/img/dupes-diver-large.jpg)
+
+Grayscale and down-sized to 9x9 (but then magnified 60x for viewing):
+
+![Diver - grayscale and down-sized](/public/img/dupes-diver-gray-square.png)
+
+And the 8x8 row and column hashes, again magnified (black = 0 bit, white = 1 bit):
+
+![Diver - row hash](/public/img/dupes-diver-hash.png)
 
 The core of the dHash code is as simple as a couple of nested `for` loops:
 
