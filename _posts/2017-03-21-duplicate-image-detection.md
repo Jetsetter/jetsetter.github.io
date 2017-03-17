@@ -29,6 +29,12 @@ We use a perceptual image hash called dHash ("difference hash"), which was [deve
 
 dHash is great because it's fairly accurate, and very simple to understand and implement. It's also fast to calculate (Python is not very fast at bit twiddling, but all the hard work of converting to grayscale and downsizing is done by a C library: [ImageMagick/wand](http://docs.wand-py.org/en/latest/) or [PIL](https://pillow.readthedocs.io/en/4.0.x/)).
 
+Here's what this process looks like visually:
+
+* TODO: original image
+* TODO: grayscale, downsized image (but blown up)
+* TODO: final output black and white (but blown up)
+
 The core of the dHash code is as simple as a couple of nested `for` loops:
 
 ```python
@@ -50,19 +56,26 @@ def dhash_row_col(image, size=8):
     return (row_hash, col_hash)
 ```
 
-And here's what this process looks like visually:
-
-* TODO: original image
-* TODO: grayscale, downsized image (but blown up)
-* TODO: final output black and white (but blown up)
-
-It's a simple enough algorithm to implement, but there are a few tricky edge cases, and we thought it'd be nice to roll it all together and open source it, so our Python code is available [on GitHub](https://github.com/Jetsetter/dhash) and [on the Python Package Index](https://pypi.python.org/pypi/dhash) -- so it's only a `pip install dhash` away.
+It's a simple enough algorithm to implement, but there are a few tricky edge cases, and we thought it'd be nice to roll it all together and open source it, so our Python code is available [on GitHub](https://github.com/Jetsetter/dhash) and [from the Python Package Index](https://pypi.python.org/pypi/dhash) -- so it's only a `pip install dhash` away.
 
 
-Thresholds
-----------
+Dupe threshold
+--------------
 
-TODO
+To determine whether an image is a duplicate, you compare the dHash values. If the hash values are equal, the images are nearly identical. If they hash values are only a few bits different, they're very very similar -- so you can calculate the number of bits different ([hamming distance](https://en.wikipedia.org/wiki/Hamming_distance)) between the two values, and then check if that's under a given threshold.
+
+Side note: there's a helper function in our Python dhash library called `get_num_bits_different()` that calculates the delta. Oddly enough, in Python the fastest way to do this is to XOR the values, convert the result to a binary string, and count the number of `'1'` characters (this is because then you're asking builtin functions written in C to do the hard work and looping):
+
+```python
+def get_num_bits_different(hash1, hash2):
+    return bin(hash1 ^ hash2).count('1')
+```
+
+On our set of images (over 200,000 total) we set the 128-bit dHash threshold to 2. In other words, if the hashes are equal or only different in 1 or 2 bits, we consider them duplicates. In our tests, this is a large enough delta to catch most of the dupes. When we tried going to 4 or 5 it started catching false positives -- images that had similar fingerprints but were too different visually.
+
+For example, this was one of the image pairs that helped us settle on a threshold of 2. These two images have a delta of 4 bits:
+
+![False positive "dupes" with dHash delta of 4 bits](/public/img/dupes-false-positive.jpg)
 
 
 MySQL filter
@@ -77,4 +90,3 @@ BK-trees and fast dupe detection
 TODO
 
 BK-tree:  ([described by Nick Johnson](http://blog.notdot.net/2007/4/Damn-Cool-Algorithms-Part-1-BK-Trees)).
-
