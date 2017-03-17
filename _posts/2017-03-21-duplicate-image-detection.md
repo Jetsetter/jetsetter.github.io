@@ -83,9 +83,9 @@ MySQL bit counting
 
 I'm a big PostgreSQL fan, but we're using MySQL for this project, and one of the neat little functions it has that PostgreSQL doesn't is `BIT_COUNT()`, which counts the number of 1 bits in a 64-bit integer. So if you break up the 128-bit hash into two parts you can use two `BIT_COUNT` calls to determine whether a binary hash column is within the threshold.
 
-It's a little round-about, because MySQL doesn't seem to have a way to convert part of a binary column to a 64-bit integer, so we did it going to hex and back. Our dHash column is called `dhash8`, and `dhash8_0` and `dhash8_1` are the high and low 64-bit literal values of the hash of the image we're comparing.
+It's a little round-about, because MySQL doesn't seem to have a way to convert part of a binary column to a 64-bit integer, so we did it going to hex and back (let us know if there's a better way!). Our dHash column is called `dhash8`, and `dhash8_0` and `dhash8_1` are the high and low 64-bit literal values of the hash of the image we're comparing.
 
-So here's the query we use to detect duplicates when we upload a new image:
+So here's the query we use to detect duplicates when we upload a new image (well, we're actually using the Python [SQLAlchemy ORM](https://www.sqlalchemy.org/), but close enough):
 
 ```sql
 SELECT asset_id, dhash8
@@ -98,10 +98,40 @@ WHERE
     <= 2                               -- less than threshold?
 ```
 
+The above is a relatively slow query that involves a full table scan, but we only do it once on upload, so taking an extra second then isn't a big deal.
+
 
 BK-trees and fast dupe detection
 --------------------------------
 
-TODO
+However, when we were searching for existing duplicates in our entire image set (which was about 150,000 photos at the time), it turns into an O(N^2) problem pretty quickly -- for every photo, you have to look for dupes in every other photo. With a hundred thousand images, that's way too slow, so we needed something better. Enter the BK-tree.
 
-BK-tree:  ([described by Nick Johnson](http://blog.notdot.net/2007/4/Damn-Cool-Algorithms-Part-1-BK-Trees)).
+A BK-tree is an *n*-ary tree data structure specifically designed for finding "close" matches fast. For example, finding strings within a certain [edit distance](https://en.wikipedia.org/wiki/Levenshtein_distance) of a given string. Or in our case, finding dHash values within a certain [bit distance](https://en.wikipedia.org/wiki/Hamming_distance) of a given dHash. This turns an O(N^2) problem into something closer to an O(log N) one. (We discovered a truly marvelous proof of this, but this margin is too narrow to contain it.)
+
+BK-trees are ([described by Nick Johnson](http://blog.notdot.net/2007/4/Damn-Cool-Algorithms-Part-1-BK-Trees) in his "Damn Cool Algorithms" blog series. It's a little dense, but the structure itself is actually quite simple, especially in Python where creating trees using is very easy with a bunch of nested dictionaries. The `BKTree.add()` code:
+
+``` python
+def add(self, item):
+    """Add given item to this tree."""
+    node = self.tree
+    if node is None:
+        self.tree = (item, {})
+        return
+    while True:
+        parent, children = node
+        distance = self.distance_func(item, parent)
+        node = children.get(distance)
+        if node is None:
+            children[distance] = (item, {})
+            break
+```
+
+There were a couple of existing BK-tree libraries in Python (and I think more since we added ours), but one of them didn't work for us and was buggy ([ryanfox/bktree](https://github.com/ryanfox/bktree)), and the one that looked good wasn't on PyPI ([ahupp/bktree](https://github.com/ahupp/bktree)), so we rolled our own.
+
+So again, our Python code is available [on GitHub](https://github.com/Jetsetter/pybktree) and [from the Python Package Index](https://pypi.python.org/pypi/pybktree) -- so it's only a `pip install pybktree` away.
+
+
+Comments
+--------
+
+If you have feedback or links to your own related work, please let us know -- add a comment below, or head over to the Hacker News and reddit programming threads.
