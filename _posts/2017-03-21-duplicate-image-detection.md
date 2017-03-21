@@ -38,7 +38,7 @@ Grayscale and down-sized to 9x9 (but then magnified for viewing):
 
 And the 8x8 row and column hashes, again magnified (black = 0 bit, white = 1 bit):
 
-![Diver - row hash](/public/img/dupes-diver-hash.png)
+![Diver - row hash](/public/img/dupes-diver-hash01.png)
 
 The core of the dHash code is as simple as a couple of nested `for` loops:
 
