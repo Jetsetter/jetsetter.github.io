@@ -113,7 +113,7 @@ However, when we were searching for existing duplicates in our entire image set 
 
 A BK-tree is an *n*-ary tree data structure specifically designed for finding "close" matches fast. For example, finding strings within a certain [edit distance](https://en.wikipedia.org/wiki/Levenshtein_distance) of a given string. Or in our case, finding dHash values within a certain [bit distance](https://en.wikipedia.org/wiki/Hamming_distance) of a given dHash. This turns an O(N^2) problem into something closer to an O(log N) one. (We discovered a truly marvelous proof of this, but the margin is too narrow to contain it.)
 
-BK-trees are ([described by Nick Johnson](http://blog.notdot.net/2007/4/Damn-Cool-Algorithms-Part-1-BK-Trees) in his "Damn Cool Algorithms" blog series. It's dense reading, but the BK-tree structure is actually quite simple, especially in Python where creating trees using is very easy with a bunch of nested dictionaries. The `BKTree.add()` code to add an item to a tree:
+BK-trees are [described by Nick Johnson](http://blog.notdot.net/2007/4/Damn-Cool-Algorithms-Part-1-BK-Trees) in his "Damn Cool Algorithms" blog series. It's dense reading, but the BK-tree structure is actually quite simple, especially in Python where creating trees using is very easy with a bunch of nested dictionaries. The `BKTree.add()` code to add an item to a tree:
 
 ``` python
 def add(self, item):
