@@ -139,4 +139,4 @@ So again, our Python code is available [on GitHub](https://github.com/Jetsetter/
 Comments
 --------
 
-If you have feedback or links to your own related work, please let us know -- add a comment below, or head over to the Hacker News and reddit programming threads.
+If you have feedback or links to your own related work, please let us know -- add a comment below, or head over to the [Hacker News](https://news.ycombinator.com/item?id=13921731) and [reddit programming](https://www.reddit.com/r/programming/comments/60neu0/duplicate_image_detection_with_perceptual_hashing/) threads.
